@@ -58,12 +58,6 @@ public class loginController {
             log.error("注册出现异常",e.getMessage());
             return "login";
         }
-//        Map<String, Object> map = userService.regiester(username, password);
-//        if (map.isEmpty()) {
-//            return "redirect:/";
-//        } else {
-//            return "login";
-//        }
     }
 
     @RequestMapping(value = "/login/", method = RequestMethod.POST)

@@ -88,5 +88,11 @@ public class UserService {
     public void logout(String ticket){
         loginTicketDao.updateStatus(ticket,1);
     }
+
+
+    public User getUserById(int id){
+        User user = userDao.getUserById(id);
+        return user;
+    }
 }
 

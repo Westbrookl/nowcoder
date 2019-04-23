@@ -1,0 +1,17 @@
+1 Thread.currentThread().getClassLoader().getResourceAsStream();
+
+2 对流的处理：包装的过程是Stream ->Reader->BufferedReader,其中Stream读取的是二进制流 reader读取的字符流，BufferedReader则是可以对字符进行换行处理的内容等。
+
+3 如何在初始化Bean的时候便读取一个文件：
+implements InitializingBean  
+InitializingBean接口为bean提供了初始化方法的方式，它只包括afterPropertiesSet方法，凡是继承该接口的类，在初始化bean的时候都会执行该方法。当进行依赖注入的时候，都会执行这个方法。
+
+
+4 实现了一个敏感词过滤的算法：
+1 首先创建了一个敏感词树：通过map来实现的树。（树的每个节点有一个map ，一个char，还有一个标志位判断是不是终点）
+2 在创建这个树的时候，会从root节点开始遍历内容，直到最后的节点，并且把最后节点的标志位设置成为true
+3 在实现过滤的时候，有三个记录值一个是begin 一个是pos，一个是tempNode tempNode都是从root的开始
+  算法的流程图：
+     1 判断当前值是否为空格 如果是空格的话 1 如果没有进入敏感词判断，直接加在后面，begin++,pos++ 如果进入的话则跳过这个值pos++
+     2 看这个字符是不是敏感词：1不是的话直接更新，begin post temp = root 2 如果是 并且是最后一个的话则屏蔽掉 3 如果是并且不是最后的一个的直接pos++
+     3 最后把 begin以后的内容加到结果上面去。
