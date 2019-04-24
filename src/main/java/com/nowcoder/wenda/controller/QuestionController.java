@@ -1,9 +1,9 @@
 package com.nowcoder.wenda.controller;
 
-import com.nowcoder.wenda.model.HostHolder;
-import com.nowcoder.wenda.model.Question;
-import com.nowcoder.wenda.model.User;
+import com.nowcoder.wenda.dao.CommentDao;
+import com.nowcoder.wenda.model.*;
 import com.nowcoder.wenda.service.QuestionService;
+import com.nowcoder.wenda.service.UserService;
 import com.nowcoder.wenda.util.WendaUtil;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
@@ -11,11 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -29,6 +33,12 @@ public class QuestionController {
 
     @Autowired
     HostHolder hostHolder;
+
+    @Autowired
+    CommentDao commentDao;
+
+    @Autowired
+    UserService userService;
 
     /**
      * 添加问题的逻辑为：
@@ -64,5 +74,23 @@ public class QuestionController {
 
             return WendaUtil.getJSONString(1,"失败");
 
+    }
+
+
+    @RequestMapping(value="/question/{qid}",method = RequestMethod.GET)
+    public String questionDetail(Model model, @PathVariable("qid")int qid){
+        Question question = questionService.getById(qid);
+        model.addAttribute("question",question);
+
+        List<Comment> comments = commentDao.getAllComments(EntityType.ENTITY_QUESTION,qid);
+        List<ViewObject> viewObjects = new ArrayList<ViewObject>();
+        for(Comment c1:comments){
+            ViewObject vo = new ViewObject();
+            vo.set("comment",c1);
+            vo.set("user",userService.getUserById(c1.getUserId()));
+            viewObjects.add(vo);
+        }
+        model.addAttribute("comments",viewObjects);
+        return "detail";
     }
 }

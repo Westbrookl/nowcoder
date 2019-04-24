@@ -1,0 +1,22 @@
+第六次更新的内容为：
+1 增加了评论的功能
+	评论的功能设计了一个数据库：Id content entity_type entity_id user_id create_date
+	 这个评论可以是对于一个问题的回答，也可以是对问题的评论，所以对于所有要实现评论功能的内容来说，可以通过定义一个评论类型外加一个评论id便可确定。
+	主要的功能有：
+	1 增加评论
+	2 显示评论
+	3 展示一个问题下面所有的评论
+	4 更新评论的状态
+2 增加了私信的功能
+	私信功能设计了一个表：id from_id,to_id,conversation_id(这个字段存在的意义：是为了让两个人的对话同意起来),has_read,content,create_date
+	私信实现的功能：
+	1 展示所有的消息
+	2 展示两个人之间的所有的信息
+	3 增加了一个未读信息的数目
+	待实现的功能：
+	1 两个人直接通信，目前只能通过id去实现
+	2 实现通过一个回复键直接实现对其回复。
+关于 sql语句的嵌套
+ 
+SELECT * ，count(id) as id FROM( SELECT * FROM  TABLENAME where from_id =  or to_id =  order by create_date desc) tt group by conversation_id order by create_date desc
+从所有的message当中选出符合我们要求的message 然后通过conversation_id聚合成为一张新的表，注意tt所选择出来的内容需要重新定义一个新的表名字。

@@ -40,4 +40,8 @@ public class QuestionService {
         return questionDao.addQuestion(question) > 0 ? question.getId():0;
     }
 
+    public Question getById(int id){
+        return questionDao.getQuestionById(id);
+    }
+
 }

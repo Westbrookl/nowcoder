@@ -19,4 +19,6 @@ public interface QuestionDao {
     @Select({"SELECT ",FIELD," FROM ",TABLE_NAME,"    ORDER BY id DESC  LIMIT #{offset},#{limit}"})
     List<Question> selectLatestQuestions(@Param("userId") int userId, @Param("offset") int offset,
                                          @Param("limit") int limit);
+    @Select({"SELECT ",FIELD," FROM ",TABLE_NAME," WHERE id = #{id}"})
+    Question getQuestionById(int id);
 }

@@ -94,5 +94,9 @@ public class UserService {
         User user = userDao.getUserById(id);
         return user;
     }
+
+    public User getUserByName(String name){
+        return userDao.getUserByName(name);
+    }
 }
 
