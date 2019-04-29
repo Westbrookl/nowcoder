@@ -1,0 +1,25 @@
+使用redis实现了对回答的赞和踩的功能。
+
+1 关于redis的介绍：
+   	redis是一种nosql的数据库，存储在内存当中。
+	redis 的内部的数据类型：字符串，列表，集合，有序集合，散列表。底层对于集合以及有序集合的实现是通过跳表实现的，对于散列表类似于HashMap的实现。
+	以及关于各种数据类型的使用：
+		列表：可以作为队列使用，因为提供了从两端删除和插入的方式。
+		集合：用来去重，可以实现点赞或者点踩的功能。
+		有序集合：实现排行榜。
+		散列表：可以用来扩展对象的属性。
+2 在项目中实现的赞和踩的功能。
+	1 首先引入 Jedis作为java与redis连接的包
+	2 创建一个 JedisPool的类并且在Spring初始化的时候，创建出一个关于redis的连接池。这个连接池的主要作用类似于线程池的		作用，jedisPool = new JedisPool("redis://localhost:6379/9");
+	3 创建了一个 JedisAdapter 这个类的主要的作用是：通过这个类实现上层调用redis中的api并且使用里面的功能。（
+	   3.1 因为redis是一种nosql的数据库，所以在redis当中的数据库对于键的设定比较严格，所以通过对喜欢的内容点赞的时候，		需要记录下点赞的问题类型与问题的id。
+	   3.2 因为涉及到了两种类型，所以创建了key来记录喜欢和不喜欢，LikeType 和DislikeType）
+	4 创建 LikeService的类，这个类的主要方便LikeController的调用，实现的方法有：
+		（1）likeCount(int type,int id);通过问题的类型和id获取点赞的总数。
+	    	（2）like(int userId,int type,int id);用户对问题点了赞，并且从点踩的集合当中删除用户id
+		（3）disLike(int userId,int  type,int id)用户对问题点了踩，并且从点赞的集合当中删除用户id
+	5 创建LikeController的类，因为是一个ajax里面的调用
+	 	1 /like的接口，去调用like方法，并且返回当前的用户是否对该问题点赞。
+		2 /dislike的接口，去调用dislike方法
+	6 在QuestionController 当中显示question的详情内容的时候。
+		当加载这个页面的时候需要显示出当前问题所获得的赞和菜。	

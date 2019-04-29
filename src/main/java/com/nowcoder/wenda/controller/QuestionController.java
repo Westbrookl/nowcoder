@@ -2,6 +2,8 @@ package com.nowcoder.wenda.controller;
 
 import com.nowcoder.wenda.dao.CommentDao;
 import com.nowcoder.wenda.model.*;
+import com.nowcoder.wenda.service.LikeService;
+import com.nowcoder.wenda.service.LikeService1;
 import com.nowcoder.wenda.service.QuestionService;
 import com.nowcoder.wenda.service.UserService;
 import com.nowcoder.wenda.util.WendaUtil;
@@ -9,7 +11,6 @@ import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,9 @@ public class QuestionController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    LikeService likeService;
 
     /**
      * 添加问题的逻辑为：
@@ -79,17 +83,42 @@ public class QuestionController {
 
     @RequestMapping(value="/question/{qid}",method = RequestMethod.GET)
     public String questionDetail(Model model, @PathVariable("qid")int qid){
+
         Question question = questionService.getById(qid);
         model.addAttribute("question",question);
 
         List<Comment> comments = commentDao.getAllComments(EntityType.ENTITY_QUESTION,qid);
+
         List<ViewObject> viewObjects = new ArrayList<ViewObject>();
-        for(Comment c1:comments){
+        for(Comment comment:comments){
             ViewObject vo = new ViewObject();
-            vo.set("comment",c1);
-            vo.set("user",userService.getUserById(c1.getUserId()));
+            vo.set("comment",comment);
+            if(hostHolder.get() == null){
+                vo.set("liked",0);
+            }else{
+                vo.set("liked",likeService.getLikeStatus(hostHolder.get().getId(),EntityType.ENTITY_QUESTION,comment.getId()));
+            }
+//            System.out.println(likeService.getLikeCount(comment.getEntityType(),comment.getId()));
+            vo.set("likeCount",likeService.getLikeCount(EntityType.ENTITY_QUESTION,comment.getEntityId()));
+            vo.set("user",userService.getUserById(comment.getUserId()));
             viewObjects.add(vo);
         }
+//        for(Comment c1:comments){
+//            ViewObject vo = new ViewObject();
+//            vo.set("comment",c1);
+//            if(hostHolder.get() == null) {
+//                vo.set("liked", 0);
+//            }else{
+//                System.out.println(555);
+//                vo.set("liked",likeService.getStatus(hostHolder.get().getId(),EntityType.ENTITY_QUESTION,c1.getId()));
+//            }
+//            System.out.println(66);
+//             long count = likeService.getLikeCount(EntityType.ENTITY_QUESTION,c1.getId());
+//            vo.set("likeCount",count);
+//            System.out.println(88);
+//            vo.set("user",userService.getUserById(c1.getUserId()));
+//            viewObjects.add(vo);
+//        }
         model.addAttribute("comments",viewObjects);
         return "detail";
     }

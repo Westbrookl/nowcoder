@@ -23,4 +23,6 @@ public interface CommentDao {
 
     @Select({"SELECT count(id) FROM", TABLE," WHERE entity_id=#{entityId} AND entity_type = #{entityType}"})
     int getCommentCount(@Param("entityId")int entityId,@Param("entityType")int entityType);
+    @Select({"SELECT ",KEY," from ",TABLE," WHERE id = #{id}"})
+    Comment getById(int id);
 }
