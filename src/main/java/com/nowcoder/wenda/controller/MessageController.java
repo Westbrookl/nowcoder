@@ -34,13 +34,14 @@ public class MessageController {
 
     @RequestMapping(value = "/msg/list",method = RequestMethod.GET)
     public String getMessageList(Model model){
+        if(hostHolder.get() == null) return "redirect:/relogin";
         try{
             int localUserId = hostHolder.get().getId();
             List<Message> messages = messageService.getAllConversations(localUserId,0,10);
             List<ViewObject> vos = new ArrayList<ViewObject>();
             for(Message msg : messages){
                 ViewObject vo = new ViewObject();
-                vo.set("conversation",msg);
+                vo.set("message",msg);
                 //得到所有发过来的信息的Id
                 int targetId = msg.getFromId() == localUserId ? msg.getToId():msg.getFromId();
                 User fromUser = userService.getUserById(targetId);

@@ -3,7 +3,6 @@ package com.nowcoder.wenda.controller;
 import com.nowcoder.wenda.dao.CommentDao;
 import com.nowcoder.wenda.model.*;
 import com.nowcoder.wenda.service.LikeService;
-import com.nowcoder.wenda.service.LikeService1;
 import com.nowcoder.wenda.service.QuestionService;
 import com.nowcoder.wenda.service.UserService;
 import com.nowcoder.wenda.util.WendaUtil;
@@ -96,10 +95,10 @@ public class QuestionController {
             if(hostHolder.get() == null){
                 vo.set("liked",0);
             }else{
-                vo.set("liked",likeService.getLikeStatus(hostHolder.get().getId(),EntityType.ENTITY_QUESTION,comment.getId()));
+                vo.set("liked",likeService.getLikeStatus(hostHolder.get().getId(),EntityType.ENTITY_COMMENT,comment.getId()));
             }
 //            System.out.println(likeService.getLikeCount(comment.getEntityType(),comment.getId()));
-            vo.set("likeCount",likeService.getLikeCount(EntityType.ENTITY_QUESTION,comment.getEntityId()));
+            vo.set("likeCount",likeService.getLikeCount(EntityType.ENTITY_COMMENT,comment.getId()));
             vo.set("user",userService.getUserById(comment.getUserId()));
             viewObjects.add(vo);
         }

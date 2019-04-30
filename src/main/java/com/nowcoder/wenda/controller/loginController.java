@@ -1,6 +1,9 @@
 package com.nowcoder.wenda.controller;
 
 import com.nowcoder.wenda.service.UserService;
+import com.nowcoder.wenda.sync.EventModel;
+import com.nowcoder.wenda.sync.EventProducer;
+import com.nowcoder.wenda.sync.EventType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,9 @@ public class loginController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    EventProducer eventProducer;
 
     @RequestMapping(value = "/reglogin", method = RequestMethod.GET)
     public String loginPage(Model model,@RequestParam(value = "next",required = false)String next) {
@@ -76,6 +82,10 @@ public class loginController {
                     cookie.setMaxAge(3600 * 24 * 5);
                 }
                 response.addCookie(cookie);
+
+//                eventProducer.fireEvent(new EventModel(EventType.LOGIN).setExt("username",username)
+//
+//                        .setExt("mail","498535334@qq.com"));
                 if(StringUtils.isNotBlank(next)){
                     return "redirect:"+next;
                 }

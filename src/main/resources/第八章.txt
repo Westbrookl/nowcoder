@@ -1,0 +1,34 @@
+通过redis实现了一个类似于异步的框架：
+	优势在于： 对于耗时比较长的操作可以通过异步的形式，不占用总的操作的时间，不会阻塞影响到后面的操作。
+具体实现的原理：
+	通过redis里面对于列表的操作，有两个api lpush左边插入一个元素，brpop右边阻塞等待一个可以取出的内容，如果没有的话
+	  便阻塞等待到redis里边存在内容。
+	通过一个时间模型，创建一个producer和consumer，和一个事件的模型还有各种处理的handler
+各个模块：
+	1 关于事件的原型 EventModel
+		内部的属性： 1 actorId 2 EventType 3 entityId 4 entityType 5 ownerId 6 map(这个map主要是为了方便扩容，			  即定义满足自己需求的属性。)
+	2 事件的类型 enum  EventType
+		内部类型分为四种：0是对于登录的处理，1是对于LIKE的处理 后面还可以根据需求自己添加
+	3 事件的生产者 EventProducer
+		需要把这个类依赖注入到Spring当中，定义了一个fireEvent(EventModel)的方法，这个方法的主要的作用是将生成的数据放入到redis当中去，具体的做法是: 生成一个redis当中key，这个key的定义是"queue"，然后因为在列表中存储的内容都是 String类型的，需要把 EventModel转换成为String通过JSONObject.parse(model);  通过redis.lpush(key,value);放入到redis当中。
+	4 事件的消费者 EventConsumer
+		1 加载配置把所有要处理的类型和要处理的对应的hanler放入到一个map当中
+			这里用到了两个类，一个是IntializingBean ApplicationContextAware这两个类，第一个类是保证了在初始化的时候，可以把属性注入到bean当中去，第二类保证了能够获得Spring的上下文。
+			还有一个 Map<EventType,List<EventHanler> >这是一个多对多的关系，即一个Type可以被多个hanlder处理，一个handler也可以处理多中type。
+			对于map的具体的实现：Map<String,EventHanler> map = applicationContext.getBeansTypeOf()
+		2 将处理事务的线程启动起来
+		  创建线程执行EventModel里面的内容，通过redis.brpop(key);得到model然后转换成为EventModel的类型，然后得到model里面多有支持的type，找到map中对应的hanlder一次去执行doHandle的方法。
+
+	5 事件的处理接口：interface EventHanlder
+		里面定义了两个方法：1  void doHandle(EventModel model); 2 List<EventType> getSupportType()
+		对于第一个方法是：每个handler具体的执行的流程，不同的handle执行不同的方法，对于第二个方法得到所有的支持的类型的意思，是当前的handler有可能不只处理一种事件类型，可以处理多种的EventType的类型。
+	6 时间的处理类： class MessageHanlder
+		重写两个方法，一个是 doHanlde();具体的操作，2 是List<EventType> getSupportType（）自己定义自己想要处理的类型。
+
+2 功能发送邮件的功能：
+	利用javamail的包，设置自己的host，这里需要注意的是：设置的hostname要跟自己通过验证的邮箱一样。		
+		
+1 关于config的加载时候的先后顺序
+	一开始的逻辑处理错误， if（map.containsKey(key)）{}else{} 这样就会导致第一次出现的内容，不能放入到map当中去。
+2 关于 entityType与entityId的确认以及区分
+	评论是基于问题的，如果是对评论的评论或者统计评论的内容的时候 entityType，和 id都是评论相关的。

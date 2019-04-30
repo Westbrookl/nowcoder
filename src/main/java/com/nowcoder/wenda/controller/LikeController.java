@@ -2,8 +2,12 @@ package com.nowcoder.wenda.controller;
 
 import com.nowcoder.wenda.dao.CommentDao;
 import com.nowcoder.wenda.model.Comment;
+import com.nowcoder.wenda.model.EntityType;
 import com.nowcoder.wenda.model.HostHolder;
 import com.nowcoder.wenda.service.LikeService;
+import com.nowcoder.wenda.sync.EventModel;
+import com.nowcoder.wenda.sync.EventProducer;
+import com.nowcoder.wenda.sync.EventType;
 import com.nowcoder.wenda.util.WendaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +28,8 @@ public class LikeController {
     CommentDao commentDao;
     @Autowired
     LikeService likeService;
+    @Autowired
+    EventProducer eventProducer;
 
     @RequestMapping(value = "/like",method = RequestMethod.POST)
     @ResponseBody
@@ -32,8 +38,12 @@ public class LikeController {
             WendaUtil.getJSONString(999);
         }
         Comment comment = commentDao.getById(commentId);
-
-        long likeCount = likeService.like(hostHolder.get().getId(),comment.getEntityType(),comment.getEntityId());
+        EventModel model = new EventModel(EventType.LIKE);
+        eventProducer.fireEvent(model.setActorId(hostHolder.get().getId()).setOwnerId(comment.getUserId())
+                .setEntityId(commentId)
+                .setEntityType(EntityType.ENTITY_COMMENT)
+                .setExt("questionId",String.valueOf(comment.getEntityId())));
+        long likeCount = likeService.like(hostHolder.get().getId(),EntityType.ENTITY_COMMENT, commentId);
         return WendaUtil.getJSONString(0,String.valueOf(likeCount));
     }
 
@@ -43,8 +53,7 @@ public class LikeController {
         if(hostHolder.get() == null){
             return WendaUtil.getJSONString(999);
         }
-        Comment comment = commentDao.getById(commentId);
-        long dislike = likeService.dislike(hostHolder.get().getId(),comment.getEntityType(),comment.getEntityId());
-        return WendaUtil.getJSONString(0,String .valueOf(dislike));
+        long likeCount = likeService.dislike(hostHolder.get().getId(),EntityType.ENTITY_COMMENT,commentId);
+        return WendaUtil.getJSONString(0,String .valueOf(likeCount));
     }
 }
