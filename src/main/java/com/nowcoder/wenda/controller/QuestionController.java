@@ -2,6 +2,7 @@ package com.nowcoder.wenda.controller;
 
 import com.nowcoder.wenda.dao.CommentDao;
 import com.nowcoder.wenda.model.*;
+import com.nowcoder.wenda.service.FollowService;
 import com.nowcoder.wenda.service.LikeService;
 import com.nowcoder.wenda.service.QuestionService;
 import com.nowcoder.wenda.service.UserService;
@@ -43,63 +44,67 @@ public class QuestionController {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    FollowService followService;
+
     /**
      * 添加问题的逻辑为：
      * 首先构建出一个符合数据库的类，然后去创建数据库里面的内容
      * 有两个特殊的地方：一个是当前没有登录的时候，设置一个匿名的账户
      * 第二个：当账户登录的时候，创建问题成功的话，返回的是一个json（code =0）
      * 当创建问题失败的时候，创建的是一个json(1，“msg = ‘失败’”);
+     *
      * @param title
      * @param content
      * @return
      */
-    @RequestMapping(value = "/question/add",method = RequestMethod.POST)
+    @RequestMapping(value = "/question/add", method = RequestMethod.POST)
     @ResponseBody
-    public String addQuestion(@Param("title")String title,@Param("content")String content){
-        try{
+    public String addQuestion(@Param("title") String title, @Param("content") String content) {
+        try {
             Question question = new Question();
             question.setTitle(title);
             question.setContent(content);
             question.setCommentCount(0);
             question.setCreateDate(new Date());
             User user = hostHolder.get();
-            if(user == null){
+            if (user == null) {
                 question.setUserId(WendaUtil.ANONYMOUS_USERID);
-            }else{
+            } else {
                 question.setUserId(user.getId());
             }
-            if(questionService.addQuestion(question) > 0){
+            if (questionService.addQuestion(question) > 0) {
                 return WendaUtil.getJSONString(0);
             }
-        }catch (Exception e){
-            logger.error("添加问题错误",e.getMessage());
+        } catch (Exception e) {
+            logger.error("添加问题错误", e.getMessage());
         }
 
-            return WendaUtil.getJSONString(1,"失败");
+        return WendaUtil.getJSONString(1, "失败");
 
     }
 
 
-    @RequestMapping(value="/question/{qid}",method = RequestMethod.GET)
-    public String questionDetail(Model model, @PathVariable("qid")int qid){
+    @RequestMapping(value = "/question/{qid}", method = RequestMethod.GET)
+    public String questionDetail(Model model, @PathVariable("qid") int qid) {
 
         Question question = questionService.getById(qid);
-        model.addAttribute("question",question);
+        model.addAttribute("question", question);
 
-        List<Comment> comments = commentDao.getAllComments(EntityType.ENTITY_QUESTION,qid);
+        List<Comment> comments = commentDao.getAllComments(EntityType.ENTITY_QUESTION, qid);
 
         List<ViewObject> viewObjects = new ArrayList<ViewObject>();
-        for(Comment comment:comments){
+        for (Comment comment : comments) {
             ViewObject vo = new ViewObject();
-            vo.set("comment",comment);
-            if(hostHolder.get() == null){
-                vo.set("liked",0);
-            }else{
-                vo.set("liked",likeService.getLikeStatus(hostHolder.get().getId(),EntityType.ENTITY_COMMENT,comment.getId()));
+            vo.set("comment", comment);
+            if (hostHolder.get() == null) {
+                vo.set("liked", 0);
+            } else {
+                vo.set("liked", likeService.getLikeStatus(hostHolder.get().getId(), EntityType.ENTITY_COMMENT, comment.getId()));
             }
 //            System.out.println(likeService.getLikeCount(comment.getEntityType(),comment.getId()));
-            vo.set("likeCount",likeService.getLikeCount(EntityType.ENTITY_COMMENT,comment.getId()));
-            vo.set("user",userService.getUserById(comment.getUserId()));
+            vo.set("likeCount", likeService.getLikeCount(EntityType.ENTITY_COMMENT, comment.getId()));
+            vo.set("user", userService.getUserById(comment.getUserId()));
             viewObjects.add(vo);
         }
 //        for(Comment c1:comments){
@@ -118,7 +123,27 @@ public class QuestionController {
 //            vo.set("user",userService.getUserById(c1.getUserId()));
 //            viewObjects.add(vo);
 //        }
-        model.addAttribute("comments",viewObjects);
+        model.addAttribute("comments", viewObjects);
+        List<ViewObject> vos = new ArrayList<ViewObject>();
+        List<Integer> followers = followService.getAllFollowers(EntityType.ENTITY_QUESTION, qid, 20);
+        for (Integer follower : followers) {
+            User user = userService.getUserById(follower);
+            if (user == null) {
+                continue;
+            }
+            ViewObject vo = new ViewObject();
+            vo.set("name", user.getName());
+            vo.set("headUrl", user.getHeadUrl());
+            vo.set("id", user.getId());
+            vos.add(vo);
+        }
+        model.addAttribute("followUsers", vos);
+        if (hostHolder.get() == null) {
+            model.addAttribute("followed", false);
+        } else {
+            model.addAttribute("followed", followService.isFollower(hostHolder.get().getId(), EntityType.ENTITY_QUESTION, qid));
+        }
+
         return "detail";
     }
 }

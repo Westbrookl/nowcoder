@@ -9,15 +9,29 @@ public class RedisKeyUtil {
     private static String BIZ_DISLIEK = "DISLIKE";
 
     private static String BIZ_QUEUE = "EVENT_QUEUE";
-    public static String getLikeKey(int entityType,int entityId){
-        return BIZ_LIKE+separator+String.valueOf(entityType)+separator+String.valueOf(entityId);
-    }
-    public static String getDislikeKey(int entityType,int entityId){
-        return BIZ_DISLIEK+separator+String.valueOf(entityType)+separator+String.valueOf(entityId);
+
+    private static String BIZ_FOLLOWER = "EVENT_FOLLOWER";
+
+
+    private static String BIZ_FOLLOWEE = "EVENT_FOLLOWEE";
+
+    public static String getLikeKey(int entityType, int entityId) {
+        return BIZ_LIKE + separator + String.valueOf(entityType) + separator + String.valueOf(entityId);
     }
 
-    public static String getQueueKey(){
-        return  BIZ_QUEUE;
+    public static String getDislikeKey(int entityType, int entityId) {
+        return BIZ_DISLIEK + separator + String.valueOf(entityType) + separator + String.valueOf(entityId);
     }
 
+    public static String getQueueKey() {
+        return BIZ_QUEUE;
+    }
+
+    public static String getFollowerKey(int entityType, int entityId) {
+        return BIZ_FOLLOWER + separator + String.valueOf(entityType) + separator + String.valueOf(entityId);
+    }
+
+    public static String getFolloweeKey(int userId, int entityType) {
+        return BIZ_FOLLOWEE + separator + String.valueOf(userId) + separator + String.valueOf(entityType);
+    }
 }
