@@ -25,6 +25,21 @@ public class JedisAdapter implements InitializingBean {
         jedisPool = new JedisPool("redis://localhost:6379/10");
     }
 
+    public List<String> lrange(String key,int start,int end){
+        Jedis jedis = null;
+        try{
+            jedis = jedisPool.getResource();
+            return jedis.lrange(key,start,end);
+
+        }catch (Exception e){
+            logger.error("lrange 异常"+e.getMessage());
+        }finally {
+            if(jedis != null){
+                jedis.close();
+            }
+        }
+        return null;
+    }
     public long sadd(String key, String value) {
         Jedis jedis = null;
         try {

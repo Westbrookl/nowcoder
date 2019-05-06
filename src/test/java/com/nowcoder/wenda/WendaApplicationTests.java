@@ -38,7 +38,7 @@ public class WendaApplicationTests {
             User user = new User();
             user.setHeadUrl(String.format("http://images.nowcoder.com/head/%dt.png", random.nextInt(1000)));
             user.setName(String.format("USER%d", i+1));
-            user.setPassword("");
+            user.setPassword("123");
             user.setSalt("");
             userDAO.addUser(user);
 

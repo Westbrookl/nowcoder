@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 public interface CommentDao {
     String TABLE = "comment";
-    String FIELD = "content, user_id,create_date,entity_id,entity_type,status";
+    String FIELD = "content, user_id,created_date,entity_id,entity_type,status";
     String KEY = "id, " + FIELD;
 
     @Select({"SELECT ",KEY," from ",TABLE," WHERE entity_type= #{entityType} AND entity_id=#{entityId}"})
