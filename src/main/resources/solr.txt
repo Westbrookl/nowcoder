@@ -1,0 +1,22 @@
+https://blog.csdn.net/cs_hnu_scw/article/details/79388080
+
+向solr中上传数据库中的内容
+
+http://www.cnblogs.com/ITDreamer/p/10661949.html
+使用中文分词
+
+
+springboot与solr整合
+内部通过与solr的服务器定值建立连接，solr可以提供给外部url接口，根据自己的需要可以定值url
+需要注意的是：自己定义的内容需要通过solrQuery的map来自定义属性和value，然后去实现。在这个项目的源码中一开始没有设置索引的键，通过添加solr.set("df","questionTitlte")
+
+
+这一次主要实现了全文搜索，通过solr+IKAnalyzer实现全文搜索。
+把数据上传到solr可以方便我们更快的检索数据库。但是在整合的过程容易出现问题。
+一个是创建core的时候
+2 把本地的mysql中的数据上传到solr当中
+3 使用自定义的类型中文分词工具，IKAnalyer
+4 整合到SpringBoot当中，通过solrj提供的函数可以实现对问题的全站检索
+5 在添加问题的时候，因为添加问题以后会产生一个异步的消息，可以作为一个Feed流推送给关注他的人，这个时候每次使用的时候需要添加新的索引。
+
+
