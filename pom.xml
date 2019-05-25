@@ -11,6 +11,7 @@
     <groupId>com.nowcoder</groupId>
     <artifactId>wenda</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>wenda</name>
     <description>Demo project for Spring Boot</description>
 
@@ -95,6 +96,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.nowcoder.wenda.WendaApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
